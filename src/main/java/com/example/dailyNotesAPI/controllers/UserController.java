@@ -12,12 +12,14 @@ import javax.validation.Valid;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 public class UserController {
 
     @Autowired
     private UserService userService;
-    @PostMapping
+
+//    Create new user
+    @PostMapping("/user")
     public ResponseEntity<User> createUser(@Valid @RequestBody User user, BindingResult result){
         if(result.hasErrors()){
             return new ResponseEntity<>(user, HttpStatus.NOT_ACCEPTABLE);
@@ -29,8 +31,8 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
-
-    @GetMapping()
+//    get authenticated User
+    @GetMapping("/user")
     public ResponseEntity<User> findUserById(Principal principal){
         User user = userService.findUserByEmail(principal.getName());
         if(user == null){
@@ -38,7 +40,4 @@ public class UserController {
         }
         return new ResponseEntity<>(user, HttpStatus.FOUND);
     }
-
-
-
 }

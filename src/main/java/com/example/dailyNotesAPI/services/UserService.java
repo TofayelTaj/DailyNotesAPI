@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 @Service
@@ -27,6 +28,11 @@ public class UserService {
 
     public User findUserByEmail(String email){
         return userRepository.findUserByEmail(email);
+    }
+
+
+    public User getAuthenticatedUser(Principal principal){
+       return findUserByEmail(principal.getName());
     }
 
 }
