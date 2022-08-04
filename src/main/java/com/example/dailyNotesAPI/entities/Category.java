@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 @Entity
 @Data
@@ -19,9 +20,9 @@ public class Category {
     @NotEmpty(message = "Category Name can't be Empty or Null.")
     private String name;
     @ManyToOne(
-            cascade =  CascadeType.ALL,
             fetch = FetchType.LAZY
     )
     private User user;
-
+    @OneToMany(mappedBy = "category", orphanRemoval = true)
+    private List<Note> notes;
 }
