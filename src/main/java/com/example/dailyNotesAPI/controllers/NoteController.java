@@ -1,7 +1,7 @@
 package com.example.dailyNotesAPI.controllers;
 
 import com.example.dailyNotesAPI.entities.Note;
-import com.example.dailyNotesAPI.entities.NoteUpdateDTO;
+import com.example.dailyNotesAPI.entitiesDTO.NoteDTO;
 import com.example.dailyNotesAPI.services.NoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +20,9 @@ public class NoteController {
 
 //  create new note
     @PostMapping("/notes")
-    public ResponseEntity<Note> createNewNote(@RequestBody  Note note, Principal principal){
-        Note createdNote = noteService.createNewNote(note, principal);
+    public ResponseEntity<Note> createNewNote(@RequestBody  NoteDTO noteDTO, Principal principal){
+
+        Note createdNote = noteService.createNewNote(noteDTO, principal);
         if(createdNote == null){
             return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
         }
@@ -48,9 +49,8 @@ public class NoteController {
     }
 
 //    update Note by NoteId and auth User
-
     @PutMapping("/notes")
-    public ResponseEntity<Note>  updateNoteById(@RequestBody NoteUpdateDTO updateDTO, Principal principal){
+    public ResponseEntity<Note>  updateNoteById(@RequestBody NoteDTO updateDTO, Principal principal){
 
         Note updateNote = noteService.updateNote(updateDTO, principal);
         if(updateNote == null){
@@ -69,5 +69,35 @@ public class NoteController {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
+//    get all notes belongs to specific category id
+    @GetMapping("/notes/-/categories/{categoryId}")
+    public ResponseEntity<List<Note>> getNotesByCategoryId(@PathVariable Long categoryId, Principal principal){
+        List<Note> notes = noteService.getAllNoteByCategoryId(categoryId, principal);
+        if(notes == null){
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(notes, HttpStatus.OK);
+    }
 
+//    search notes by keyword on title or content
+    @GetMapping("/notes/")
+    public List<Note> searchOnNoteTitleOrContent(@RequestParam String query, @RequestParam String field, Principal principal){
+        return noteService.searchNotesByKeyword(query, field, principal);
+    }
+
+//    search notes by keyword on title and content
+    @GetMapping("/notes/-/categories/{id}/")
+    public ResponseEntity<List<Note>> searchOnNoteTitleAndContent(@PathVariable Long id,
+                                                                  @RequestParam String query,
+                                                                  @RequestParam List<String> fields,
+                                                                  Principal principal){
+        if(fields.size() == 2 && fields.contains("title") && fields.contains("content")){
+             List<Note> notes = noteService.searchNoteByKeywordOnTitleOrContent(id,query, fields, principal);
+             if(notes == null){
+                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+             }
+             return new ResponseEntity<>(notes, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
 }

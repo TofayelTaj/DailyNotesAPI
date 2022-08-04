@@ -1,6 +1,7 @@
 package com.example.dailyNotesAPI.controllers;
 
 import com.example.dailyNotesAPI.entities.Category;
+import com.example.dailyNotesAPI.entitiesDTO.CategoryDto;
 import com.example.dailyNotesAPI.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,13 +21,14 @@ public class CategoryController {
 
 //    create new categories
     @PostMapping("/categories")
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody Category category,
+    public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryDto categoryDTO,
                                                    BindingResult result,
                                                    Principal principal){
         if(result.hasErrors()){
             return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
         }
-        category = categoryService.createCategory(category, principal);
+        Category category = null;
+        category = categoryService.createCategory(categoryDTO, principal);
         if(category == null ){
             return new ResponseEntity<>(null, HttpStatus.NOT_ACCEPTABLE);
         }
@@ -42,8 +44,9 @@ public class CategoryController {
 
 //    update category by categoryId and auth user
     @PutMapping("/categories")
-    public ResponseEntity<Category> updateCategoryById(@RequestBody Category category, Principal principal){
-        category = categoryService.updateCategoryById(category, principal);
+    public ResponseEntity<Category> updateCategoryById(@RequestBody CategoryDto categoryDto, Principal principal){
+
+        Category category = categoryService.updateCategoryById(categoryDto, principal);
         if(category == null){
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
@@ -59,6 +62,4 @@ public class CategoryController {
         }
         return new ResponseEntity<>(category, HttpStatus.NO_CONTENT);
     }
-
-
 }

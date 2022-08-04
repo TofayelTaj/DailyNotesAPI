@@ -1,5 +1,6 @@
 package com.example.dailyNotesAPI.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,12 @@ public class Category {
     @ManyToOne(
             fetch = FetchType.LAZY
     )
+    @JsonBackReference
     private User user;
-    @OneToMany(mappedBy = "category", orphanRemoval = true)
+    @OneToMany(mappedBy = "category",
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    @JsonBackReference
     private List<Note> notes;
 }

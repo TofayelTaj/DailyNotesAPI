@@ -1,4 +1,4 @@
-package com.example.dailyNotesAPI.entities;
+package com.example.dailyNotesAPI.entitiesDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NoteUpdateDTO {
+public class NoteDTO {
 
     private String title;
     private String content;

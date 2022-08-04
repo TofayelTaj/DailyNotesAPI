@@ -2,12 +2,11 @@ package com.example.dailyNotesAPI.services;
 
 import com.example.dailyNotesAPI.entities.Category;
 import com.example.dailyNotesAPI.entities.User;
+import com.example.dailyNotesAPI.entitiesDTO.CategoryDto;
 import com.example.dailyNotesAPI.repositories.CategoryRepository;
-import org.hibernate.type.PrimitiveCharacterArrayClobType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.ProviderNotFoundException;
 import java.security.Principal;
 import java.util.List;
 
@@ -21,7 +20,8 @@ public class CategoryService {
     private UserService userService;
 
     //    crate new category
-    public Category createCategory(Category category, Principal principal) {
+    public Category createCategory(CategoryDto categoryDto, Principal principal) {
+        Category category = categoryDtoToCategory(categoryDto);
         category.setUser(userService.getAuthenticatedUser(principal));
         try {
             category = categoryRepository.save(category);
@@ -40,13 +40,15 @@ public class CategoryService {
 
 
     //    update category by id and auth user
-    public Category updateCategoryById(Category category, Principal principal) {
+    public Category updateCategoryById(CategoryDto categoryDto, Principal principal) {
         User user = userService.findUserByEmail(principal.getName());
-        if (!isCategoryBelongsToAuthUser(user, category)) {
+        Category category = this.categoryDtoToCategory(categoryDto);
+        if (!isCategoryBelongsToAuthUser(principal, category)) {
             return null;
         }
-        category.setUser(user);
-        return categoryRepository.save(category);
+        Category updatedCategory = (Category) categoryRepository.findById(category.getId()).get();
+        updatedCategory.setName(category.getName());
+        return categoryRepository.save(updatedCategory);
     }
 
     //    delete category by id and auth user
@@ -64,18 +66,31 @@ public class CategoryService {
     public Category getCategoryById(Long id) {
         try {
             return categoryRepository.findById(id).get();
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
     }
 
     //    check if category belongs to authenticated user
-    public boolean isCategoryBelongsToAuthUser(User user, Category category) {
-        Category categoryByIdAndUserId = categoryRepository.findCategoryByIdAndUserId(category.getId(), user.getId());
+    public boolean isCategoryBelongsToAuthUser(Principal principal, Category category) {
+        User user = userService.getAuthenticatedUser(principal);
+        Category categoryByIdAndUserId;
+        try {
+            categoryByIdAndUserId = categoryRepository.findCategoryByIdAndUserId(category.getId(), user.getId());
+        } catch (Exception e) {
+            return false;
+        }
         if (categoryByIdAndUserId == null) {
             return false;
         }
         return true;
     }
 
+    //    convert category to dto
+    private Category categoryDtoToCategory(CategoryDto categoryDto) {
+        Category category = new Category();
+        category.setName(categoryDto.getName());
+        category.setId(categoryDto.getId());
+        return category;
+    }
 }
